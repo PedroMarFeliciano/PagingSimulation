@@ -15,15 +15,19 @@ import static pagingsimulation.PagingSimulation.processesWaiting;
  */
 public class TimeLapse extends Thread {
 
-    private int tick, wastedTime = 0;
+    private int tick, wastedTime = 0, qtyOfProcesses;
+    
+    public TimeLapse(int qtyOfProcesses) {
+        this.qtyOfProcesses = qtyOfProcesses;
+    }
 
     @Override
     public void run() {
-        while (processesTerminated.size() != 200) {
+        while (processesTerminated.size() != qtyOfProcesses) {
             try {
                 tick = (int) (Math.random() * 100) % 50 + 1;
-
-                for (Process p : processesRunning) {
+                
+                for (Process p : processesRunning) { //decreases time of all running processes
                     p.decreaseExecutionTime(tick);
                     System.out.println("Agora faltam " + p.getExecutionTime() + "un. de tempo para o processo " + p.getId());
                     // when time get below zero we count as wasted processor time 

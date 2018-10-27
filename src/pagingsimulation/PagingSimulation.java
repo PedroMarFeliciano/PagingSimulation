@@ -20,14 +20,19 @@ public class PagingSimulation {
     public static int availableMemory = 1024;
     protected static int[][] memory = new int[(int) Math.sqrt(availableMemory)][(int) Math.sqrt(availableMemory)];
     //processes definition
-    private final int qtyOfProcesses = 200;
+    protected final int qtyOfProcesses = 200;
     protected static Queue<Process> processesWaiting = new ConcurrentLinkedQueue<>();
-    protected static List<Process> processesRunning = new LinkedList<>();
-    protected static List<Process> processesTerminated = new LinkedList<>();
+    protected static List<Process>  processesRunning = new LinkedList<>(),
+                                    processesTerminated = new LinkedList<>();
 
+    //statistics
+    private int largestProcess = 0,
+                smallestProcess = Integer.MAX_VALUE;
+    
+    
     ProcessAllocation processAllocator = new ProcessAllocation();
-    ProcessDeallocation processDeallocator = new ProcessDeallocation();
-    TimeLapse timeLapse = new TimeLapse();
+    ProcessDeallocation processDeallocator = new ProcessDeallocation(qtyOfProcesses);
+    TimeLapse timeLapse = new TimeLapse(qtyOfProcesses);
 
     public static void main(String[] args) {
         new PagingSimulation();
@@ -40,12 +45,18 @@ public class PagingSimulation {
         processAllocator.start();
         processDeallocator.start();
         timeLapse.start();
+        
+        
     }
 
     public void createProcesses() {
         for (int i = 0; i < qtyOfProcesses; i++) {
             Process p = new Process(i);
             System.out.println("Processo criado: " + p);
+            
+            if (p.getSize() > largestProcess) largestProcess = p.getSize();
+            if (p.getSize() < smallestProcess) smallestProcess = p.getSize();
+            
             processesWaiting.add(p);
         }
     }

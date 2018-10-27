@@ -9,18 +9,22 @@ import static pagingsimulation.PagingSimulation.availableMemory;
 import static pagingsimulation.PagingSimulation.memory;
 import static pagingsimulation.PagingSimulation.processesRunning;
 import static pagingsimulation.PagingSimulation.processesTerminated;
-import static pagingsimulation.PagingSimulation.processesWaiting;
 
 /**
  *
  * @author Pedro Feliciano
  */
 public class ProcessDeallocation extends Thread {
-
+    private int qtyOfProcesses;
+    
+    public ProcessDeallocation(int qtyOfProcesses) {
+        this.qtyOfProcesses = qtyOfProcesses;
+    }
+    
     @Override
     public void run() {
 
-        while (processesTerminated.size() != 200) {
+        while (processesTerminated.size() != qtyOfProcesses) {
             try {
                 if (!processesRunning.isEmpty()) {
 
@@ -38,13 +42,11 @@ public class ProcessDeallocation extends Thread {
     }
 
     private void deallocateProcess(Process p) {
-        for (int i = 0; i < (int) Math.sqrt(availableMemory); i++) {
-            for (int j = 0; j < (int) Math.sqrt(availableMemory); j++) {
-                if (memory[i][j] == p.getId()) {
-                    memory[i][j] = -1;
-                }
-            }
+        for (Tuple t: p.getMemoryOccupied()) {
+            memory[t.getX()][t.getY()] = -1;
         }
+        
+        
         availableMemory += p.getSize();
         System.out.println("Memória disponível aumentou " + p.getSize()
                 + "un. de memória. Total: " + availableMemory);

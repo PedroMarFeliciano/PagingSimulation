@@ -16,6 +16,9 @@ import static pagingsimulation.PagingSimulation.memory;
  */
 public class ProcessAllocation extends Thread {
 
+    private int greatestLvlOfMultiprocessing = 0,
+                deniedAllocation = 0;
+    
     @Override
     public void run() {
         while (!processesWaiting.isEmpty()) {
@@ -26,6 +29,9 @@ public class ProcessAllocation extends Thread {
                     processToMemory(processesWaiting.element().getSize());
                     System.out.println("    Processo " + processesWaiting.element().getId()
                             + " alocado e movido para a fila de execução.");
+                }
+                else {
+                    deniedAllocation++;
                 }
             } catch (Exception e) {
                 //do nothing
@@ -40,6 +46,9 @@ public class ProcessAllocation extends Thread {
             for (int j = 0; j < (int) Math.sqrt(availableMemory); j++) {
                 if (memory[i][j] == -1) {
                     memory[i][j] = processesWaiting.element().getId();
+                    
+                    processesWaiting.element().addMemoryPosition(i, j);
+                    
                     processSize--;
                 }
 
@@ -54,5 +63,17 @@ public class ProcessAllocation extends Thread {
                 + processesWaiting.element().getSize() + " un. de memória."
                 + " Total: " + availableMemory);
         processesRunning.add(processesWaiting.remove());
+        
+        if (processesRunning.size() > greatestLvlOfMultiprocessing) {
+            greatestLvlOfMultiprocessing = processesRunning.size();
+        }
+    }
+    
+    public int getGreatestLvlOfMultiprocessing() {
+        return greatestLvlOfMultiprocessing;
+    }
+    
+    public int getDeniedAllocation() {
+        return deniedAllocation;
     }
 }
